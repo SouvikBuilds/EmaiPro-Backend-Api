@@ -12,7 +12,7 @@ const userSchema = new Schema(
       maxlength: 50,
       validate: {
         validator: (value) => /^[A-Za-z\s]+$/.test(value),
-        message: `${value} is not a valid name`,
+        message: `{value} is not a valid name`,
       },
       trim: true,
     },
@@ -23,7 +23,7 @@ const userSchema = new Schema(
       validate: {
         validator: (value) =>
           /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/.test(value),
-        message: `${value} is not a valid email`,
+        message: `{value} is not a valid email`,
       },
       trim: true,
       lowercase: true,
