@@ -16,6 +16,7 @@ const createContact = asyncHandler(async (req, res) => {
         name,
         email,
         group,
+        owner: req.user?._id,
       });
       return res
         .status(201)
@@ -99,4 +100,32 @@ const updateContact = asyncHandler(async (req, res) => {
     throw new ApiError(500, error?.message);
   }
 });
-export { createContact, findContactById, findContact, updateContact };
+
+const deleteContact = asyncHandler(async (req, res) => {
+  try {
+    const { contactId } = req.params;
+    if (!isValidObjectId(contactId)) {
+      throw new ApiError(400, "Invalid Contact Id");
+    }
+    const contact = await Contact.findById(contactId);
+    if (!contact) {
+      throw new ApiError(404, "Contact not found");
+    }
+    if (contact.owner.toString() !== req.user?._id.toString()) {
+      throw new ApiError(403, "You are not authorized to delete this contact");
+    }
+    await Contact.findByIdAndDelete(contactId);
+    return res
+      .status(200)
+      .json(new ApiResponse(200, {}, "Contact deleted successfully"));
+  } catch (error) {
+    throw new ApiError(500, error?.message);
+  }
+});
+export {
+  createContact,
+  findContactById,
+  findContact,
+  updateContact,
+  deleteContact,
+};
