@@ -9,6 +9,8 @@ const verifyJWT = asyncHandler(async (req, res, next) => {
     const accessToken =
       req.cookies?.accessToken ||
       req.header("Authorization")?.replace("Bearer ", "");
+    console.log("Request cookies: ", req.cookies);
+    console.log("AccessToken: ", accessToken);
     if (!accessToken) {
       throw new ApiError(401, "Unauthorized access token");
     }

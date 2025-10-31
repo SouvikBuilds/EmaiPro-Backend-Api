@@ -2,6 +2,7 @@ import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
 import authRouter from "./routes/auth.route.js";
+import contactRouter from "./routes/contact.route.js";
 
 const app = express();
 app.use(
@@ -21,4 +22,5 @@ app.get("/", (req, res) => {
 });
 // routes
 app.use("/api/v1/auth", authRouter);
+app.use("/api/v1/contact", contactRouter);
 export default app;
