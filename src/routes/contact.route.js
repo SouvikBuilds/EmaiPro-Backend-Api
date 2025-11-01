@@ -7,14 +7,16 @@ import {
   findContact,
   updateContact,
   deleteContact,
+  getAllContacts,
 } from "../controllers/contact.controller.js";
 import { verifyJWT } from "../middlewares/auth.middleware.js";
 
 router.use(verifyJWT);
 router.route("/").post(createContact);
-router.route("/:contactId").get(findContactById);
+router.route("/find/:contactId").get(findContactById);
 router.route("/find").post(findContact);
-router.route("/:contactId").patch(updateContact);
+router.route("/update/:contactId").patch(updateContact);
 router.route("/delete/:contactId").delete(deleteContact);
+router.route("/get/:userId").get(getAllContacts);
 
 export default router;

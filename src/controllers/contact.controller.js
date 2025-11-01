@@ -90,7 +90,7 @@ const updateContact = asyncHandler(async (req, res) => {
         },
       },
       { new: true }
-    ).populate("owner", "name email -password");
+    ).populate("owner", "name email ");
     return res
       .status(200)
       .json(
@@ -122,10 +122,79 @@ const deleteContact = asyncHandler(async (req, res) => {
     throw new ApiError(500, error?.message);
   }
 });
+
+const getAllContacts = asyncHandler(async (req, res) => {
+  try {
+    const {
+      page = 1,
+      limit = 10,
+      sortBy = "createdAt",
+      sortType = "desc",
+      userId,
+    } = req.query;
+
+    // Convert page and limit to numbers
+    const pageNumber = parseInt(page);
+    const limitNumber = parseInt(limit);
+    const skip = (pageNumber - 1) * limitNumber;
+
+    // Basic filter (you can expand later)
+    const filter = { contact: { $exists: true, $ne: null } };
+
+    // If you want to show contacts of a specific user
+    if (userId) {
+      filter.owner = userId;
+    } else if (req.user?._id) {
+      filter.owner = req.user._id;
+    }
+
+    // Sorting logic
+    const sortOrder = sortType === "asc" ? 1 : -1;
+    const sortOption = { [sortBy]: sortOrder };
+
+    // Fetch contacts
+    const contacts = await Contact.find(filter)
+      .sort(sortOption)
+      .skip(skip)
+      .limit(limitNumber);
+
+    const totalContacts = await Contact.countDocuments(filter);
+    const totalPages = Math.ceil(totalContacts / limitNumber);
+
+    if (!contacts || contacts.length === 0) {
+      throw new ApiError(404, "No contacts found");
+    }
+
+    // Response
+    return res.status(200).json(
+      new ApiResponse(
+        200,
+        {
+          contacts,
+          pagination: {
+            currentPage: pageNumber,
+            totalPages,
+            totalContacts,
+            limit: limitNumber,
+          },
+          sorting: {
+            sortBy,
+            sortType,
+          },
+        },
+        "Contacts fetched successfully"
+      )
+    );
+  } catch (error) {
+    throw new ApiError(500, error?.message || "Failed to fetch contacts");
+  }
+});
+
 export {
   createContact,
   findContactById,
   findContact,
   updateContact,
   deleteContact,
+  getAllContacts,
 };
